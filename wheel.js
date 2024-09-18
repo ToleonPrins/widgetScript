@@ -39,14 +39,6 @@
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
           }
 
-          #wheel {
-            border-radius: 50%;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-            margin-top: 20px;
-            width: 100%;
-            max-width: 360px;
-          }
-
           #spinButton {
             margin-top: 10px;
             padding: 15px 30px;
@@ -92,6 +84,13 @@
           h5 {
             font-size: 14px;
             color: #555;
+          }
+
+          #centerImage {
+            border-radius: 50%;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 360px;
           }
 
           /* Стиль кнопки закрытия виджета */
@@ -165,6 +164,10 @@
             h5 {
               font-size: 12px;
             }
+
+            #centerImage {
+              max-width: 280px; /* Уменьшение размера изображения на мобильных */
+            }
           }
         `;
     document.head.appendChild(style);
@@ -180,7 +183,7 @@
             </h5>
             <input type="text" id="phoneInput" value="+7" maxlength="12" />
             <button id="spinButton" disabled>Крутить колесо</button>
-            <canvas id="wheel"></canvas>
+            <img id="centerImage" src="https://raw.githubusercontent.com/AVAbsk/Pictures/main/dili.png" alt="Изображение колеса">
             <!-- Модальное окно для вывода результата -->
             <div id="resultModal" class="modal">
               <div class="modal-content">
@@ -200,50 +203,11 @@
   function initializeWheelWidget() {
     const widget = document.getElementById("wheelWidget");
     const closeWidgetButton = document.getElementById("closeWidgetButton");
-    const canvas = document.getElementById("wheel");
-    const ctx = canvas.getContext("2d");
     const spinButton = document.getElementById("spinButton");
     const phoneInput = document.getElementById("phoneInput");
     const resultModal = document.getElementById("resultModal");
     const resultText = document.getElementById("resultText");
     const modalCloseButton = document.querySelector(".modal .close");
-
-    const slices = [
-      "Скидка на обучение 5%",
-      "Не повезло",
-      "Скидка на обучение 10%",
-      "Не повезло",
-      "Учебная литература в подарок",
-      "Не повезло",
-      "Скидка на обучение 1000₽",
-      "Не повезло",
-    ];
-
-    const colors = [
-      "#D4564C", // Красный
-      "#393939", // Черный
-      "#D4564C",
-      "#393939",
-      "#D4564C",
-      "#393939",
-      "#D4564C",
-      "#393939",
-    ];
-
-    let startAngle = 0;
-    const arc = (2 * Math.PI) / slices.length;
-    let spinTimeout = null;
-    let spinAngleStart = 0;
-    let spinTime = 0;
-    let spinTimeTotal = 0;
-    let hasSpun = false;
-
-    let arrowAngle = 0;
-    let lastSectorIndex = -1;
-
-    const centerImage = new Image();
-    centerImage.src =
-      "https://raw.githubusercontent.com/AVAbsk/Pictures/main/dili.png";
 
     // Добавление обработчиков событий
     closeWidgetButton.addEventListener("click", () => {
@@ -260,15 +224,10 @@
       }
     });
 
-    spinButton.addEventListener("click", spin);
-    window.addEventListener("resize", resizeCanvas);
-
     phoneInput.addEventListener("focus", handlePhoneFocus);
     phoneInput.addEventListener("keydown", handlePhoneKeyDown);
     phoneInput.addEventListener("beforeinput", handlePhoneBeforeInput);
     phoneInput.addEventListener("input", handlePhoneInput);
-
-    resizeCanvas();
 
     function handlePhoneFocus() {
       if (phoneInput.value.length < 2) {
@@ -310,7 +269,7 @@
       }
 
       const phoneNumber = phoneInput.value.trim();
-      if (validatePhoneNumber(phoneNumber) && !hasSpun) {
+      if (validatePhoneNumber(phoneNumber)) {
         spinButton.disabled = false;
       } else {
         spinButton.disabled = true;
@@ -320,247 +279,6 @@
     function validatePhoneNumber(phone) {
       const phoneRegex = /^\+7\d{10}$/;
       return phoneRegex.test(phone);
-    }
-
-    function resizeCanvas() {
-      const containerWidth = widget.offsetWidth;
-      const canvasSize = Math.min(containerWidth, 500); // Максимальный размер 500px
-
-      canvas.width = canvasSize;
-      canvas.height = canvasSize;
-
-      drawWheel();
-    }
-
-    function drawWheel() {
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      const outerRadius = canvas.width / 2 - 10;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = "#fff";
-      ctx.lineWidth = 2;
-
-      slices.forEach((slice, i) => {
-        const angle = startAngle + i * arc;
-
-        ctx.fillStyle = colors[i];
-
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, outerRadius, angle, angle + arc, false);
-        ctx.lineTo(centerX, centerY);
-        ctx.fill();
-        ctx.stroke();
-
-        // Рисование текста
-        ctx.save();
-        ctx.fillStyle = "#fff";
-        const textAngle = angle + arc / 2;
-        const textRadius = outerRadius * 0.8;
-
-        ctx.translate(
-          centerX + Math.cos(textAngle) * textRadius,
-          centerY + Math.sin(textAngle) * textRadius
-        );
-        ctx.rotate(textAngle + Math.PI / 2);
-        ctx.font = `${canvas.width / 30}px sans-serif`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        wrapText(ctx, slice, 0, 0, outerRadius * 0.5, canvas.width / 20);
-        ctx.restore();
-      });
-
-      // Рисование центрального изображения
-      if (centerImage.complete) {
-        const imageRadius = outerRadius * 0.2;
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, imageRadius, 0, 2 * Math.PI);
-        ctx.closePath();
-        ctx.clip();
-        ctx.drawImage(
-          centerImage,
-          centerX - imageRadius,
-          centerY - imageRadius,
-          imageRadius * 2,
-          imageRadius * 2
-        );
-        ctx.restore();
-      } else {
-        centerImage.onload = drawWheel;
-      }
-
-      // Рисование стрелки
-      drawArrow(centerX, centerY, outerRadius);
-    }
-
-    function drawArrow(centerX, centerY, outerRadius) {
-      ctx.save();
-      ctx.translate(centerX, centerY - outerRadius - 10);
-      ctx.rotate(arrowAngle);
-
-      ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
-      ctx.shadowBlur = 3;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-
-      const arrowWidth = canvas.width / 33;
-      const arrowHeight = canvas.width / 10;
-
-      // Левая часть стрелки
-      ctx.beginPath();
-      ctx.moveTo(-arrowWidth, 0);
-      ctx.lineTo(0, 0);
-      ctx.lineTo(0, arrowHeight);
-      ctx.closePath();
-      ctx.fillStyle = "#B3B0B1";
-      ctx.fill();
-
-      // Правая часть стрелки
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(arrowWidth, 0);
-      ctx.lineTo(0, arrowHeight);
-      ctx.closePath();
-      ctx.fillStyle = "#6E6B6C";
-      ctx.fill();
-
-      ctx.restore();
-    }
-
-    function wrapText(context, text, x, y, maxWidth, lineHeight) {
-      const words = text.split(" ");
-      let line = "";
-      for (const word of words) {
-        const testLine = `${line}${word} `;
-        const { width: testWidth } = context.measureText(testLine);
-        if (testWidth > maxWidth && line !== "") {
-          context.fillText(line, x, y);
-          line = `${word} `;
-          y += lineHeight;
-        } else {
-          line = testLine;
-        }
-      }
-      context.fillText(line, x, y);
-    }
-
-    function spin() {
-      const phoneNumber = phoneInput.value.trim();
-
-      if (!validatePhoneNumber(phoneNumber)) {
-        alert(
-          "Пожалуйста, введите корректный номер телефона в формате +7XXXXXXXXXX"
-        );
-        return;
-      }
-
-      spinButton.disabled = true;
-      hasSpun = true;
-
-      // Здесь можно добавить отправку номера телефона на сервер, если требуется
-
-      const possibleAngles = [1405, 1165];
-      spinAngleStart =
-        possibleAngles[Math.floor(Math.random() * possibleAngles.length)];
-
-      spinTime = 0;
-      spinTimeTotal = 4000; // Общее время вращения в миллисекундах
-      rotateWheel();
-    }
-
-    function rotateWheel() {
-      spinTime += 30;
-      if (spinTime >= spinTimeTotal) {
-        // Завершаем вращение и останавливаем колесо
-        startAngle = startAngle % (2 * Math.PI); // Нормализуем угол
-        drawWheel();
-        stopRotateWheel();
-        return;
-      }
-
-      const spinProgress = spinTime / spinTimeTotal;
-      const easedSpin = easeOut(spinProgress) * spinAngleStart;
-      const deltaAngle =
-        ((easedSpin -
-          easeOut((spinTime - 30) / spinTimeTotal) * spinAngleStart) *
-          Math.PI) /
-        180;
-      startAngle += deltaAngle;
-      startAngle %= 2 * Math.PI;
-
-      // Проверяем, прошёл ли новый сектор под стрелкой
-      checkArrowTick();
-
-      drawWheel();
-      spinTimeout = setTimeout(rotateWheel, 30);
-    }
-
-    function checkArrowTick() {
-      const degrees = (startAngle * 180) / Math.PI + 90;
-      const arcd = (arc * 180) / Math.PI;
-      let currentSectorIndex = Math.floor((360 - (degrees % 360)) / arcd);
-      currentSectorIndex %= slices.length;
-
-      if (currentSectorIndex !== lastSectorIndex) {
-        lastSectorIndex = currentSectorIndex;
-        triggerArrowAnimation();
-      }
-    }
-
-    function triggerArrowAnimation() {
-      arrowAngle = -15 * (Math.PI / 180); // Отклонение на -15 градусов
-
-      const tickDuration = 100; // Длительность подергивания в мс
-      const tickStartTime = performance.now();
-
-      function animateTick(currentTime) {
-        const elapsed = currentTime - tickStartTime;
-        const progress = elapsed / tickDuration;
-
-        if (progress < 1) {
-          arrowAngle = -15 * (1 - progress) * (Math.PI / 180);
-          drawWheel();
-          requestAnimationFrame(animateTick);
-        } else {
-          arrowAngle = 0;
-          drawWheel();
-        }
-      }
-
-      requestAnimationFrame(animateTick);
-    }
-
-    function stopRotateWheel() {
-      clearTimeout(spinTimeout);
-      const degrees = (startAngle * 180) / Math.PI + 90;
-      const arcd = (arc * 180) / Math.PI;
-      let index = Math.floor((360 - (degrees % 360)) / arcd);
-      index %= slices.length;
-      const landedSector = slices[index];
-
-      showResult(landedSector);
-    }
-
-    function showResult(result) {
-      let message = "";
-      if (result.includes("1000₽")) {
-        message =
-          "<span style='color: #D4564C;'>Поздравляем!<br></span> Вы выиграли скидку на обучение 1000₽!<br>Для подтверждения купона позвоните нам<br><a href='tel:+79299942055' style='color: #D4564C;'>+7 (929) 994-20-55</a>";
-      } else if (result.includes("Учебная литература")) {
-        message =
-          "<span style='color: #D4564C;'>Поздравляем!<br></span> Вы выиграли учебную литературу в подарок!<br>Для подтверждения купона позвоните нам<br><a href='tel:+79299942055' style='color: #D4564C;'>+7 (929) 994-20-55</a>";
-      } else {
-        message = `Ваш результат: ${result}`;
-      }
-
-      resultText.innerHTML = message;
-      resultModal.style.display = "block";
-    }
-
-    function easeOut(t) {
-      return --t * t * t + 1;
     }
   }
 })();
