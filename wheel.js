@@ -154,7 +154,7 @@
 
             #phoneInput {
               width: 100%;
-              max-width: 175px;
+              max-width: 140px;
             }
 
             h1 {
