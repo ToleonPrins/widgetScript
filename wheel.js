@@ -44,7 +44,7 @@
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
             margin-top: 20px;
             width: 100%;
-            max-width: 360px;
+            max-width: 500px;
           }
 
           #spinButton {
@@ -325,17 +325,23 @@
     function resizeCanvas() {
       const containerWidth = widget.offsetWidth;
       const canvasSize = Math.min(containerWidth, 500); // Максимальный размер 500px
+      const dpr = window.devicePixelRatio || 1;
 
-      canvas.width = canvasSize;
-      canvas.height = canvasSize;
+      canvas.width = canvasSize * dpr;
+      canvas.height = canvasSize * dpr;
+      canvas.style.width = `${canvasSize}px`;
+      canvas.style.height = `${canvasSize}px`;
+
+      ctx.scale(dpr, dpr); // Масштабируем контекст
 
       drawWheel();
     }
 
     function drawWheel() {
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      const outerRadius = canvas.width / 2 - 10;
+      const dpr = window.devicePixelRatio || 1;
+      const centerX = canvas.width / (2 * dpr);
+      const centerY = canvas.height / (2 * dpr);
+      const outerRadius = (canvas.width / 2) / dpr - 10;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.strokeStyle = "#fff";
@@ -364,10 +370,10 @@
           centerY + Math.sin(textAngle) * textRadius
         );
         ctx.rotate(textAngle + Math.PI / 2);
-        ctx.font = `${canvas.width / 30}px sans-serif`;
+        ctx.font = `${canvas.width / (30 * dpr)}px sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        wrapText(ctx, slice, 0, 0, outerRadius * 0.5, canvas.width / 20);
+        wrapText(ctx, slice, 0, 0, outerRadius * 0.5, canvas.width / (20 * dpr));
         ctx.restore();
       });
 
@@ -379,6 +385,9 @@
         ctx.arc(centerX, centerY, imageRadius, 0, 2 * Math.PI);
         ctx.closePath();
         ctx.clip();
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(
           centerImage,
           centerX - imageRadius,
@@ -405,8 +414,8 @@
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
-      const arrowWidth = canvas.width / 33;
-      const arrowHeight = canvas.width / 10;
+      const arrowWidth = canvas.width / (33 * (window.devicePixelRatio || 1));
+      const arrowHeight = canvas.width / (10 * (window.devicePixelRatio || 1));
 
       // Левая часть стрелки
       ctx.beginPath();
