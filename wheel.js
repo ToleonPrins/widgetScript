@@ -1,4 +1,3 @@
-  <script>
     (function() {
       // Проверяем, что документ загружен
       if (document.readyState === 'loading') {
@@ -560,4 +559,3 @@
         }
       }
     })();
-  </script>
