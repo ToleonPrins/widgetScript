@@ -1,14 +1,4 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Колесо Фортуны</title>
-</head>
-<body>
-  <!-- Виджет будет добавлен динамически через скрипт -->
-  
-  <script>
+ <script>
     (function() {
       // Проверяем, что документ загружен
       if (document.readyState === 'loading') {
@@ -571,5 +561,3 @@
       }
     })();
   </script>
-</body>
-</html>
