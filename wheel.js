@@ -145,6 +145,7 @@
             .wheel-container {
               width: 90%; /* Увеличенные отступы на мобильных */
               padding: 15px;
+              aspect-ratio: 1;
             }
 
             #spinButton {
